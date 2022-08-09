@@ -1,0 +1,22 @@
+{
+    "name": "nikba/bus-system-php-sdk",
+    "description": "bussystem.eu API PHP SDK",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Nikba\\BusSystemPhpSdk\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Bargan Nicolai",
+            "email": "office@nikba.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=5.6",
+        "guzzlehttp/guzzle": "^6.4 || ^7.4"
+    }
+}
