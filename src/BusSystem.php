@@ -15,12 +15,7 @@ use GuzzleHttp\Psr7\Request;
  * @author Bargan Nicolai <office@nikba.com>
  */
 
-class BusSystem {
-    /**
-     * @bool true if test mode is enabled
-     */
-    private $testMode = false;
-     
+class BusSystem {     
     /**
      * @var string API base URL
      */
@@ -48,13 +43,11 @@ class BusSystem {
      * @param bool $testMode true if test mode is enabled
      * @param string $language API Language
      */
-    public function __construct($login, $password, $testMode = false, $language = 'en') {
+    public function __construct($baseurl, $login, $password, $language = 'en') {
 
-        $this->baseurl = (self::$testMode) ? 'https://test.bussystem.eu/api/' : 'https://bussystem.eu/api/';
-
+        $this->baseurl = $baseurl;
         $this->login = $login;
         $this->password = $password;
-        $this->testMode = $testMode;
         $this->language = $language;
     }
 
@@ -68,13 +61,17 @@ class BusSystem {
     private function request($method, $endpoint, $params = []) {
         $client = new Client();
 
-        $request = new Request($method, self::$baseurl . $endpoint . '?' . http_build_query($params));
-        $response = $client->send($request);
-        $response = $response->getBody()->getContents();
-        print_r($response);
+        $params['login'] = $this->login;
+        $params['password'] = $this->password;
+        $params['lang'] = $this->language;
 
-        #$this->apiResponse = json_decode($response->getBody()->getContents(), true);
-        #return $this->apiResponse;
+
+        $request = new Request($method, $this->baseurl . $endpoint . '?' . http_build_query($params));
+        $response = $client->send($request);
+        
+        $xml = simplexml_load_string($response->getBody()->getContents(),'SimpleXMLElement',LIBXML_NOCDATA);
+        $json = json_encode($xml);
+        return $json;
     }
 
     /**
@@ -82,7 +79,7 @@ class BusSystem {
      * @return array Countries.
      */
     public function getCountries() {
-        return $this->request('GET', 'countries');
+        return $this->request('GET', '/curl/get_points.php', ['viev' => 'get_country']);
     }
    
 }
