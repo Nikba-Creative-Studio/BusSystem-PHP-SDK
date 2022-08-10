@@ -61,25 +61,50 @@ class BusSystem {
     private function request($method, $endpoint, $params = []) {
         $client = new Client();
 
-        $params['login'] = $this->login;
-        $params['password'] = $this->password;
-        $params['lang'] = $this->language;
+        $options = [
+            'multipart' => [
+                [
+                    'name' => 'login',
+                    'contents' => $this->login,
+                ],
+                [
+                    'name' => 'password',
+                    'contents' => $this->password,
+                ],
+                [
+                    'name' => 'language',
+                    'contents' => $this->language,
+                ],
+                
+          ]];
+          
+          # Push Params to Options
+          foreach ($params as $key => $value) {
+            array_push($options['multipart'], ['name' => $key, 'contents' => $value]);
+          }
 
-
-        $request = new Request($method, $this->baseurl . $endpoint . '?' . http_build_query($params));
-        $response = $client->send($request);
-        
-        $xml = simplexml_load_string($response->getBody()->getContents(),'SimpleXMLElement',LIBXML_NOCDATA);
-        $json = json_encode($xml);
-        return $json;
+          $request = new Request('POST', $this->baseurl . $endpoint);
+          $res = $client->sendAsync($request, $options)->wait();
+          $response = $res->getBody()->getContents();
+          $xml = simplexml_load_string($response,'SimpleXMLElement',LIBXML_NOCDATA);
+          return $xml;
     }
 
     /**
-     * Get Countries
+     * Get Points
+     * Selection of available cities, countries.
      * @return array Countries.
+     * @param int country_id - Shows all cities of the specified country (optional parameter)
+     * @param int point_id_from - Shows all cities where you can get from the specified point, may not reflect the reality if routes of the external systems have been connected (optional parameter)
+     * @param int point_id_to - Shows all cities wherefrom you can get to the specified point, may not reflect the reality if routes of the external systems have been connected (optional parameter)
+     * @param string autocomplete - Shows the cities, the initial symbols of which coincide (optional parameter)
+     * @param float boundLatSW, boundLonSW, boundLatNE, boundLotNE - Search cities in a given field of GPS
+     * @param string trans - all, bus, train, air, travel, hotel - Shows only the cities that belong to the specified transport or service, if more than one is connected (optional parameter, all by default)
+     * @param string viev - get_country - To get a list of countries, please specify this parameter, group_country - Shows the cities grouped by the countries in the orderly list (if lang is specified, cities and countries will be displayed in that language, ru is set by default)
+     * @param int all - 1 - get a list of all cities (including towns, villages, etc.), 0 - get a list of popular cities 
      */
-    public function getCountries() {
-        return $this->request('GET', '/curl/get_points.php', ['viev' => 'get_country']);
+    public function getPoints($params) {
+        return $this->request('POST', '/curl/get_points.php', $params);
     }
    
 }
