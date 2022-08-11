@@ -7,11 +7,8 @@ use GuzzleHttp\Psr7\Request;
 
 /**
  * bussystem.eu API PHP wrapper
- *
  * BusSystem is bus transport control system
- *
  * @see https://bussystem.eu/api/en.html BusSystem API.
- *
  * @author Bargan Nicolai <office@nikba.com>
  */
 
@@ -72,7 +69,7 @@ class BusSystem {
                     'contents' => $this->password,
                 ],
                 [
-                    'name' => 'language',
+                    'name' => 'lang',
                     'contents' => $this->language,
                 ],
                 
@@ -83,7 +80,7 @@ class BusSystem {
             array_push($options['multipart'], ['name' => $key, 'contents' => $value]);
           }
 
-          $request = new Request('POST', $this->baseurl . $endpoint);
+          $request = new Request($method, $this->baseurl . $endpoint);
           $res = $client->sendAsync($request, $options)->wait();
           $response = $res->getBody()->getContents();
           $xml = simplexml_load_string($response,'SimpleXMLElement',LIBXML_NOCDATA);
@@ -93,18 +90,160 @@ class BusSystem {
     /**
      * Get Points
      * Selection of available cities, countries.
-     * @return array Countries.
-     * @param int country_id - Shows all cities of the specified country (optional parameter)
-     * @param int point_id_from - Shows all cities where you can get from the specified point, may not reflect the reality if routes of the external systems have been connected (optional parameter)
-     * @param int point_id_to - Shows all cities wherefrom you can get to the specified point, may not reflect the reality if routes of the external systems have been connected (optional parameter)
-     * @param string autocomplete - Shows the cities, the initial symbols of which coincide (optional parameter)
-     * @param float boundLatSW, boundLonSW, boundLatNE, boundLotNE - Search cities in a given field of GPS
-     * @param string trans - all, bus, train, air, travel, hotel - Shows only the cities that belong to the specified transport or service, if more than one is connected (optional parameter, all by default)
-     * @param string viev - get_country - To get a list of countries, please specify this parameter, group_country - Shows the cities grouped by the countries in the orderly list (if lang is specified, cities and countries will be displayed in that language, ru is set by default)
-     * @param int all - 1 - get a list of all cities (including towns, villages, etc.), 0 - get a list of popular cities 
+     * @param array $params API parameters.
+     * @return array Points.
      */
     public function getPoints($params) {
         return $this->request('POST', '/curl/get_points.php', $params);
+    }
+
+    /**
+     * Get Routes
+     * Information about available active routes on the selected interval of cities as of the date specified.
+     * @param array $params API parameters.
+     * @return array Routes.
+     */
+    public function getRoutes($params) {
+        return $this->request('POST', '/curl/get_routes.php', $params);
+    }
+
+    /**
+     * Get Plan
+     * Plan places in the bus or train
+     * @param array $params API parameters.
+     * @return array Plans.
+     */
+    public function getPlan($params) {
+        return $this->request('POST', '/curl/get_plan.php', $params);
+    }
+
+    /**
+     * Get Seats
+     * Information about available seats
+     * @param array $params API parameters.
+     * @return array Seats.
+     */
+    public function getFreeSeats($params) {
+        return $this->request('POST', '/curl/get_free_seats.php', $params);
+    }
+
+    /**
+     * Get Discount
+     * Information about available discounts
+     * @param array $params API parameters.
+     * @return array Discounts.
+     */
+    public function getDiscount($params) {
+        return $this->request('POST', '/curl/get_discount.php', $params);
+    }
+
+    /**
+     * Get All Routes
+     * Information about all available routes
+     * @param array $params API parameters.
+     * @return array Routes.
+     */
+    public function getAllRoutes() {
+        return $this->request('POST', '/curl/get_all_routes.php');
+    }
+
+    /**
+     * New Order
+     * Create new order
+     * @param array $params API parameters.
+     * @return array New Route info.
+     */
+    public function newOrder($params) {
+        return $this->request('POST', '/curl/new_order.php', $params);
+    }
+
+    /**
+     * Buy Ticket
+     * Buy ticket based on generated order
+     * @param array $params API parameters.
+     * @return array New Ticket info.
+     */
+    public function buyTicket($params) {
+        return $this->request('POST', '/curl/buy_ticket.php', $params);
+    }
+
+    /**
+     * Register Ticket
+     * Registration dates for OPEN Ticket
+     * @param array $params API parameters.
+     * @return array New Ticket info.
+     */
+    public function registerTicket($params) {
+        return $this->request('POST', '/curl/reg_ticket.php', $params);
+    }
+
+    /**
+     * Cancel Ticket
+     * Cancellation of unpaid order, reservation cancellation, refund of the paid ticket (full or partial).
+     * @param array $params API parameters.
+     * @return array Order info.
+     */
+    public function cancelTicket($params) {
+        return $this->request('POST', '/curl/cancel_ticket.php', $params);
+    }
+
+    /**
+     * Get Ticket
+     * Get ticket info
+     * @param array $params API parameters.
+     * @return array Ticket info.
+     */
+    public function getTicket($params) {
+        return $this->request('POST', '/curl/get_ticket.php', $params);
+    }
+
+    /**
+     * Get Tickets
+     * Get tickets info
+     * @param array $params API parameters.
+     * @return array Tickets info.
+     */
+    public function getTickets($params) {
+        return $this->request('POST', '/curl/get_tickets.php', $params);
+    }
+
+    /**
+     * Get Tickets for Dispatch
+     * Get tickets info for dispatch
+     * @param array $params API parameters.
+     * @return array Tickets info.
+     */
+    public function getTicketsForDispatch($params) {
+        return $this->request('POST', '/curl_dispatcher/get_tickets.php', $params);
+    }
+
+    /**
+     * Get Order
+     * Get order info
+     * @param array $params API parameters.
+     * @return array Order info.
+     */
+    public function getOrder($params) {
+        return $this->request('POST', '/curl/get_order.php', $params);
+    }
+
+    /**
+     * Get Orders
+     * Get orders info
+     * @param array $params API parameters.
+     * @return array Orders info.
+     */
+    public function getOrders($params) {
+        return $this->request('POST', '/curl/get_orders.php', $params);
+    }
+
+    /** Get Cash
+     * Get cash info
+     * @param array $params API parameters.
+     * @return array Cash info.
+     */
+    public function getCash($params) {
+        return $this->request('POST', '/curl/get_cash.php', $params);
     }
    
 }
