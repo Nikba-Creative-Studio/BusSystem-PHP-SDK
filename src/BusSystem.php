@@ -33,6 +33,11 @@ class BusSystem {
      */
     private $language = 'en';
 
+    /**
+     * @var array Errors
+     */
+    private $errors = [];
+
     /** 
      * Constructor.
      * @param string $login API Login
@@ -80,11 +85,27 @@ class BusSystem {
             array_push($options['multipart'], ['name' => $key, 'contents' => $value]);
           }
 
+          // Send request
           $request = new Request($method, $this->baseurl . $endpoint);
-          $res = $client->sendAsync($request, $options)->wait();
-          $response = $res->getBody()->getContents();
-          $xml = simplexml_load_string($response,'SimpleXMLElement',LIBXML_NOCDATA);
-          return $xml;
+          
+          // Check request response
+          try {
+            $res = $client->sendAsync($request, $options)->wait();
+            $response = $res->getBody()->getContents();
+            $xml = simplexml_load_string($response,'SimpleXMLElement',LIBXML_NOCDATA);
+            return $xml;
+          } catch (\Exception $e) {
+            $this->errors[] = $e->getMessage();
+            return false;
+          }
+    }
+
+    /**
+     * Get Errors
+     * @return array Errors.
+     */
+    public function getErrors() {
+        return $this->errors;
     }
 
     /**
